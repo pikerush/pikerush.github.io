@@ -1,0 +1,430 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Pikerush.io</title>
+    <style>
+	* {
+		margin: 0;
+		padding: 0;
+	}
+	img {
+		visibility: hidden;
+		display: none;
+	}
+	#vignette {
+		pointer-events: none;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		display: inline;
+		visibility: visible;
+		z-index: 2;
+	}
+	.ar{
+		font-size:35px;
+		color:lightgray;
+		background-color:rgba(0,0,0,0);
+		border:0px solid black;
+	}
+	.ar:hover{
+		color:#b3b3b3;
+	}
+</style>
+	<script src="render.js"></script>
+	<script src = "rusher.js"></script>
+    <link rel="stylesheet" href="css/std.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <script async src="http://api.adinplay.com/display/pub/RKB/rocketbirds.ga/display.min.js"></script>
+	<script async src="http://api.adinplay.com/player/v2/RKB/rocketbirds.ga/player.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <div id = "img"></div>
+	<script>
+		var dateday = (""+Date()+"").substring(8,10)-0;
+			var serverurl;
+			console.log(dateday);
+			if(dateday >=0 &&dateday <=11){
+				serverurl = "wss://pikerush1-usa.herokuapp.com";
+			}else if(dateday >11 &&dateday <=22){
+				serverurl = "wss://pikerush2-usa.herokuapp.com";
+			}else if(dateday >22 &&dateday <=33){
+				serverurl = "wss://pikerush3-usa.herokuapp.com";
+			}var HttpClient = function() {
+    			this.get = function(aUrl, aCallback) {
+        			var anHttpRequest = new XMLHttpRequest();
+        			anHttpRequest.onreadystatechange = function() { 
+            		if (anHttpRequest.readyState === XMLHttpRequest.DONE) {
+               			if (anHttpRequest.status === 200) {
+                  				aCallback(anHttpRequest.responseText);
+               			}
+            		}
+        		}
+       	 	anHttpRequest.open( "GET", aUrl, true );            
+        	anHttpRequest.send();
+   			}
+		}
+		var client = new HttpClient();
+		client.get("http://"+serverurl.substring(6,serverurl.length),function(response){console.log(response);});
+        window.dead = false;
+		window.currentindex = 0;
+		window.currentclass = "sprint";
+		var switchclasses = function(num){
+			var srcs = {
+				"freeze":"rusher-clone/poker.png",
+				"shoot":"rusher-clone/poker_shoot.png",
+				"bomb":"rusher-clone/poker_bomb.png",
+				"fire":"rusher-clone/poker_fire.png",
+				"spin":"rusher-clone/poker_spin.png",
+				"sprint":"rusher-clone/poker_fast.png"
+			}
+			var arrayr = [];
+			arrayr.push("sprint");
+			for(var i in window.unlocked){
+				arrayr.push(window.unlocked[i]);
+			}
+			
+			console.log("array of options: "+arrayr);
+			if(arrayr[window.currentindex+num]){
+				window.currentclass = arrayr[window.currentindex+num];
+				window.currentindex+=num;
+			}else{
+				if(num>0){
+					window.currentclass = arrayr[0];
+					window.currentindex = 0;
+				}else{
+					window.currentclass = arrayr[arrayr.length-1];
+					window.currentindex = arrayr.length-1;
+				}
+			}
+			console.log("CURRENT CLASS: "+window.currentclass+" should map to: "+ srcs[window.currentclass]);
+			document.getElementById("mainimgf").src = srcs[window.currentclass]||"rusher-clone/poker_fast.png";
+		}
+		window.addEventListener("load", function(event) {
+    		document.getElementById("signDiv").style.zoom = (window.innerHeight)/700;
+			document.getElementById("buyDiv").style.zoom = (window.innerHeight)/700;
+			document.getElementById("gameDiv").style.zoom = (window.innerHeight)/700;
+  		});
+    	var buystats = {
+        0:{
+          	cost:250,
+          	name:"freeze",
+          	display:"freezer",
+        },
+        1:{
+            cost:50,
+            name:"shoot", 
+            display:"ninja",
+        },
+        2:{
+            cost:500,
+            name:"bomb",
+            display:"bomber",
+        },
+        3:{
+            cost:500,
+            name:"fire",
+            display:"burner",
+        },
+        4:{
+            cost:1000,
+            name:"spin",
+            display:"spinner",
+        }
+    }
+    var displaynames = {
+        "freeze":"freezer",
+        "shoot":"ninja",
+        "bomb":"bomber",
+        "fire":"burner",
+        "spin":"spinner",
+    }
+    window.purchase = function(num){
+        if(window.coins>=buystats[num].cost){
+            window.coins -=buystats[num].cost;
+            window.unlocked.push(buystats[num].name);
+            document.getElementById('serverSelect').innerHTML += "<option value = "+buystats[num].name+" id = "+buystats[num].name+">"+displaynames[buystats[num].name]+"</option>";
+        }
+        for(var i=0; i<window.unlocked.length; i++){
+            document.getElementById("purchase"+unlocked[i]).onclick = function(){};
+            document.getElementById("purchase"+unlocked[i]).innerHTML = "<b>Purchased</b>";
+            document.getElementById("purchase"+unlocked[i]).style.backgroundColor = "gray"
+        }
+        Cookies.set('coins',window.coins);
+	    Cookies.set('unlocked',window.unlocked);
+        console.log(window.unlocked);
+        document.getElementById("coins").innerHTML = "Coins: "+window.coins;
+        document.getElementById("coins2").innerHTML = "Coins: "+window.coins;
+    }
+    var openshop = function(){
+        for(var i=0; i<window.unlocked.length; i++){
+        document.getElementById("purchase"+unlocked[i]).onclick = function(){};
+        document.getElementById("purchase"+unlocked[i]).innerHTML = "<b>Purchased</b>";
+        document.getElementById("purchase"+unlocked[i]).style.backgroundColor = "gray"
+    }
+        document.getElementById("coins").innerHTML = "Coins: "+window.coins;
+        document.getElementById("coins2").innerHTML = "Coins: "+window.coins;
+        document.getElementById("signDiv").style.display = "none";
+        document.getElementById("buyDiv").style.display = "block";
+        document.getElementById("buyDivh").style.display = "block";
+    }
+    var closeshop = function(){
+        document.getElementById("coins").innerHTML = "Coins: "+window.coins;
+        document.getElementById("coins2").innerHTML = "Coins: "+window.coins;
+        document.getElementById("signDiv").style.display = "block";
+        document.getElementById("buyDiv").style.display = "none";
+        document.getElementById("buyDivh").style.display = "none";
+    }
+    var Cookies = Cookies||{};
+    Cookies.set = Cookies.set||function(){return undefined};
+    Cookies.get = Cookies.get||function(){return undefined};
+	var aiptag = aiptag || {};
+	aiptag.cmd = aiptag.cmd || [];
+	aiptag.cmd.display = aiptag.cmd.display || [];
+	aiptag.cmd.player = aiptag.cmd.player || [];
+    window.animations = {};
+	function loadAnimation(base,path,id,num){
+		window.animations[id] = [];
+		for(var i=1; i<=num; i++){
+			if(i<=9){
+				document.getElementById("img").innerHTML += "<img id='"+id+""+i+"' src='"+path+base+"0"+i+".png'>";
+			}else if(i>9){
+				document.getElementById("img").innerHTML += "<img id='"+id+""+i+"' src='"+path+base+""+i+".png'>";
+			}
+			window.animations[id].push(document.getElementById(id+""+i));
+		}
+	}
+    loadAnimation("Symbol 100","rusher-clone/die/","d",25);
+    loadAnimation("Symbol 8500","rusher-clone/bomb/","b",16);
+	</script>
+    <script>
+window.onbeforeunload = function (e) {
+    Cookies.set('lastc',document.getElementById('serverSelect').value);
+    if(!window.dead){
+    e = e || window.event;
+
+    // For IE and Firefox prior to version 4
+    if (e) {
+        e.returnValue = 'Sure?';
+    }
+
+    // For Safari
+    return 'Sure?';
+    }
+};
+
+</script>
+</head>
+	<img id="playerfreeze" src="rusher-clone/poker.png">
+	<img id="playershoot" src="rusher-clone/poker_shoot.png">
+    <img id="playerspin" src="rusher-clone/poker_spin.png">
+    <img id="playerfire" src="rusher-clone/poker_fire.png">
+	<img id="playersprint" src="rusher-clone/poker_fast.png">
+	<img id="playerbomb" src="rusher-clone/poker_bomb.png">
+	<img id="player" src="rusher-clone/poker_fast.png">
+	<img id="spike" src="rusher-clone/spike.png">
+    <img id="fireball" src="rusher-clone/fireball.png">
+	<img id="bomb3" src="rusher-clone/bomb3.png">
+	<img id="bomb2" src="rusher-clone/bomb2.png">
+	<img id="bomb1" src="rusher-clone/bomb1.png">
+	<img id="bomb0" src="rusher-clone/bomb0.png">
+	<img id="freeze" src="rusher-clone/freeze.png">
+	<img id="frozen" src="rusher-clone/frozen.png">
+	<img id="back1" src="rusher-clone/tiles.png">
+	<img id="back2" src="rusher-clone/tilesd.png">
+    <img id="food0" src="rusher-clone/New folder/Symbol 1.png">
+    <img id="food1" src="rusher-clone/New folder/Symbol 2.png">
+    <img id="food2" src="rusher-clone/New folder/Symbol 3.png">
+    <img id="food3" src="rusher-clone/New folder/Symbol 4.png">
+    <img id="food4" src="rusher-clone/New folder/Symbol 5.png">
+    <img id="food5" src="rusher-clone/New folder/Symbol 6.png">
+<body>
+    <div style = 'position:absolute;z-index:-1; min-width:100%;min-height:100%;background-image: url("rusher-clone/tilesd.png");'></div>
+	<div id="signDiv">
+		
+     <div style = "position:absolute; top:10px; left:10px;">
+     </div>
+        <div style = "position:absolute;color:white;right:10px;top:10px;">
+            <img src="rusher-clone/coins.png" style = "width:60px;height:60px;visibility:visible;display:block;"><b id = "coins">Coins: 0</d>
+        </div>
+        <div class = "centereddd" style = "position:absolute;color:white;bottom:10px;">
+            <button class="bttn-jelly bttn-lg bttn-primary" onclick="openshop();">Buy Heros</button>
+        </div>
+        <div id="gameName">Pikerush.io</div>
+     <div id = "maincentered" class = "centeredd" style = "z-index:5;width:400px;text-align:center;">
+        <input style="-webkit-user-select: text;" id="signDiv-username" type="text" maxlength="10" placeholder="nickname" spellcheck="false" onkeydown="" autofocus="">
+        <button class="bttn-jelly bttn-lg bttn-block bttn-primary" sty onclick="window.play()">Play</button><br>
+            <select id='serverSelect' style = "display:none;background-color:#2c3e50;width:400px;">
+                <option value = "sprint">sprinter</option>
+		    </select>
+		 <div style = "height:200px;text-align:center;">
+			 <button class = "ar" onclick = "switchclasses(1)">▲</button>
+			 <div style = "width:200px;height:200px;text-align:center;">
+				 <img id = "mainimgf" src="rusher-clone/poker_fast.png" style = "border:2px solid gray;background-color:gray;border-radius:5px;margin-left:100px;width:200px;height:195px;visibility:visible;display:block;">
+			 </div>
+			 <button class = "ar" onclick = "switchclasses(-1)">▼</button>
+		 </div>
+     </div>
+		
+        
+        <!--<div class="nam" style="text-align:center;display:inline;visibility:visible;position:fixed;z-index:1;left:50%;top:50%;transform:translate(-50%, -50%);">
+-->
+		<div style = "position:absolute;border:2px solid green;color:white;bottom:2px;right:2px;width:300px;height:250px;z-index:20;background-color:gray">
+			<h1>Instructions</h1>
+			<div style = "margin-left:10px;">
+				<li>Your hero will move to your mouse</li>
+				<li>Left-click to speed up your hero</li>
+				<li>Right-click to use your characters special ability</li>
+			</div><br>
+			<h1>Partners</h1>
+			<div style = "margin-left:10px;">
+				<ul>
+          			<a href="http://titotu.io" style="font-size:20px; color:white;" target="_blank">Titotu</a>
+				</ul>
+			</div>
+		</div>
+		 <div style = "position:absolute;border:2px solid green;bottom:2px;left:2px;width:300px;height:250px;z-index:20;"><div id='rocketbirds-ga_300x250'></div></div>
+		
+	</div>
+    <div class = "nam" id = "deathDiv" style = "display:none;z-index:5;">
+        <div class="menuCard" style="display: inline-block; vertical-align: top;zoom:1.25;">
+		    <div style="color:white;">
+		        <div id = "msg" style = "text-align:center;font-size:20px;font-family:'Arial Black';">
+                </div>
+                <br>
+                <button class="bttn-jelly bttn-lg bttn-primary bttn-block" onclick="document.location = document.location">Play Again</button>
+		       <!-- <button class="joinbutton" onclick="document.location = document.location"><b>PLAY AGAIN</b></button>-->
+		    </div>
+		</div>
+    </div>
+    <div  id = "buyDivh" class = "centereddd" style = "display:none;position:absolute;color:white;bottom:10px;">
+            <button class="bttn-jelly bttn-lg bttn-primary" onclick="closeshop();">Back</button>
+        </div>
+     <div class = "nam" id = "buyDiv" style = "display:none;z-index:5;">
+         <div style = "position:absolute;color:white;right:10px;top:10px;">
+            <img src="rusher-clone/coins.png" style = "width:60px;height:60px;visibility:visible;display:block;"><b id = "coins2">Coins: 0</d>
+        </div>
+         <div id="gameName">Shop</div>
+        <div style = "overflow:auto;">
+		<div class="menuCard" style="display:inline-block;vertical-align:top;text-align:center;">
+		    <div style="color:white;text-align:center;">
+                <h1>Ninja</h1><br>
+                <img src="rusher-clone/poker_shoot.png" style = "margin-left: auto;margin-right: auto;width:150px;height:150px;visibility:visible;display:block;">
+		        <br>
+                <button id = "purchaseshoot" class="joinbutton" onclick="window.purchase(1);">
+                    <b>Purchase</b>
+                        <br>
+                        <span>
+                            <img src="rusher-clone/coins.png" style = "padding-left:55px;display:inline-block;width:40px;height:40px;visibility:visible;display:block;float:left;">
+                            <b style = "display:inline-block;float:right;padding-right:55px;font-size:40px;">50</b>
+                        </span>
+                </button>
+		    </div>
+		</div>
+        <div class="menuCard" style="display:inline-block;vertical-align:top;text-align:center;">
+		    <div style="color:white;text-align:center;">
+                <h1>Freeze</h1><br>
+                <img src="rusher-clone/poker.png" style = "margin-left: auto;margin-right: auto;width:150px;height:150px;visibility:visible;display:block;">
+		        <br>
+                <button id = "purchasefreeze" class="joinbutton" onclick="window.purchase(0);">
+                    <b>Purchase</b>
+                        <br>
+                        <span>
+                            <img src="rusher-clone/coins.png" style = "padding-left:55px;display:inline-block;width:40px;height:40px;visibility:visible;display:block;float:left;">
+                            <b style = "display:inline-block;float:right;padding-right:55px;font-size:40px;">250</b>
+                        </span>
+                </button>
+		    </div>
+		</div>
+         <div class="menuCard" style="display:inline-block;vertical-align:top;text-align:center;">
+		    <div style="color:white;text-align:center;">
+                <h1>Bomb</h1><br>
+                <img src="rusher-clone/poker_bomb.png" style = "margin-left: auto;margin-right: auto;width:150px;height:150px;visibility:visible;display:block;">
+		        <br>
+                <button id = "purchasebomb" class="joinbutton" onclick="window.purchase(2);">
+                    <b>Purchase</b>
+                        <br>
+                        <span>
+                            <img src="rusher-clone/coins.png" style = "padding-left:55px;display:inline-block;width:40px;height:40px;visibility:visible;display:block;float:left;">
+                            <b style = "display:inline-block;float:right;padding-right:55px;font-size:40px;">500</b>
+                        </span>
+                </button>
+		    </div>
+		</div>
+         <div class="menuCard" style="display:inline-block;vertical-align:top;text-align:center;">
+		    <div style="color:white;text-align:center;">
+                <h1>Fire</h1><br>
+                <img src="rusher-clone/poker_fire.png" style = "margin-left: auto;margin-right: auto;width:150px;height:150px;visibility:visible;display:block;">
+		        <br>
+                <button id = "purchasefire" class="joinbutton" onclick="window.purchase(3);">
+                    <b>Purchase</b>
+                        <br>
+                        <span>
+                            <img src="rusher-clone/coins.png" style = "padding-left:55px;display:inline-block;width:40px;height:40px;visibility:visible;display:block;float:left;">
+                            <b style = "display:inline-block;float:right;padding-right:55px;font-size:40px;">500</b>
+                        </span>
+                </button>
+		    </div>
+		</div>
+          <div class="menuCard" style="display:inline-block;vertical-align:top;text-align:center;">
+		    <div style="color:white;text-align:center;">
+                <h1>Spin</h1><br>
+                <img src="rusher-clone/poker_spin.png" style = "margin-left: auto;margin-right: auto;width:150px;height:150px;visibility:visible;display:block;">
+		        <br>
+                <button id = "purchasespin" class="joinbutton" onclick="window.purchase(4);">
+                    <b>Purchase</b>
+                        <br>
+                        <span>
+                            <img src="rusher-clone/coins.png" style = "padding-left:55px;display:inline-block;width:40px;height:40px;visibility:visible;display:block;float:left;">
+                            <b style = "display:inline-block;float:right;padding-right:55px;font-size:40px;">1000</b>
+                        </span>
+                </button>
+		    </div>
+		</div>
+         </div>
+    </div>
+	
+	<div id = "gameDiv" style = "display:none;">
+        <!--<div style = "position: absolute;text-align:center;z-index: 4;background-color:#AF783E;border: 3px solid #83592E; border-radius:10px;font-family: 'Arial Black'; font-size: 30px; top:0px; right:28px;">
+            <h5 style = "color:#4b341b;">&nbsp;&nbsp;Leaderboard&nbsp;&nbsp;</h5>
+        </div>-->
+        <div id = "leaderboard" style = "text-align:center;position:absolute; border-radius:15px; z-index: 2; right:20px; top:15px; background-color:#888888;border:4px solid #aaaaaa;opacity:1;width:220px; height:200px;"></div>
+		<div class = "centereddd" style = "position:absolute;bottom:10px;z-index:3;">
+			<div class = "upgrader" style = "margin:auto;margin-bottom:4px;">
+				<div id = "left" class = "upgraded"></div>
+				<span style = "position: relative;z-index:5;color:white;font-family:Arial;">Energy</span>
+			</div>
+			<div class = "upgrader" style = "zoom:2;margin:auto;margin-bottom:4px;">
+				<div id = "lvl" class = "upgraded"></div>
+				<span id = "lvlstat" style = "position: relative;z-index:5;color:white;font-family:Arial;">Health Regen</span>
+			</div>
+		</div>
+		
+	</div>
+    <script>
+    document.getElementById("signDiv-username").value = Cookies.get('name')||"";
+    window.coins = (Cookies.get('coins')-0)||0;
+    document.getElementById("coins").innerHTML = "Coins: "+window.coins;
+    document.getElementById("coins2").innerHTML = "Coins: "+window.coins;
+    window.unlocked = [];
+    try{
+		//window.unlocked = [];
+        window.unlocked = JSON.parse(Cookies.get('unlocked'));
+    }catch{
+        window.unlocked = [];
+    }
+    /*
+    <option value = "shoot">Shooter</option>"
+			    <option value = "freeze">Freezer</option>
+			    <option value = "bomb">Bomber</option>
+    */
+    //Cookies.set('coins',window.coins+1);
+    aiptag.cmd.display.push(function() { aipDisplayTag.display('rocketbirds-ga_300x250'); });
+    for(var i=0; i<window.unlocked.length; i++){
+        document.getElementById('serverSelect').innerHTML += "<option value = "+window.unlocked[i]+" id = "+window.unlocked[i]+">"+displaynames[window.unlocked[i]]+"</option>"
+    }
+    setTimeout(function(){
+        document.getElementById('serverSelect').value = Cookies.get('lastc')||"sprint";
+    },500);
+    </script>
+	
+</body>
+</html>
