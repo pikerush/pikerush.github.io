@@ -280,6 +280,8 @@
 	 }else if(Cookies.get("newup")===undefined){
 		 alert("Dear Pikerush players\nI have been re-doing the coining system\nin the new system all players will start\nwith 200 coins\nyou will now be given 200 free coins\nfurthermore, all classes now cost 100 coins\nThanks,\nCentipede5")
 	 	window.coins+=200;
+		 document.getElementById("coins").innerHTML = window.coins;
+		 document.getElementById("coins2").innerHTML = window.coins;
 		 Cookies.set("newup",true);
 	 }
 	</script>
