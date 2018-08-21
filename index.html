@@ -273,8 +273,9 @@
 		buystats[i].cost = 100;
 	}
 	if(window.unlocked.indexOf("shoot")===-1){
-	    window.unlocked.push("shoot");
-	window.coins+=200;
+	    //window.unlocked.push("shoot");
+		window.coins+=200;
+		document.getElementById("coins").innerHTML = window.coins
 		
 	 }
 	 
